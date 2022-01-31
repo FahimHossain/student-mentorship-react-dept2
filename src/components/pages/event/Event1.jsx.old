@@ -1,0 +1,111 @@
+import React, { useState, useEffect } from 'react'
+import Main from '../../layouts/dashborad/Main'
+import ProtectedPage from '../../layouts/ProtectedPage'
+import { Table, Button } from "react-bootstrap";
+import AddEventModal from './AddEventModal';
+import { GoogleLogin } from "react-google-login";
+import axios from "axios";
+
+export default function Event() {
+
+
+    const [show, setShow] = useState(false)
+    const [event_list, setEventList] = useState([])
+
+    useEffect(() => {
+        //ask google to get all evetns
+        //setEventList()//[]
+
+    }, [])
+
+    // gCal bgn
+    const responseGoogle = (response) => {
+        console.log(response);
+        const { code } = response;
+        axios
+            .post("http://localhost:4000/api/create-tokens", { code })
+            .then((response) => {
+                console.log(response.data);
+                setisLoggedIn(true);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+    };
+
+    const responseError = (error) => {
+        console.log(error);
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        //  console.log(summary, description, location, startDateTime, endDateTime);
+        console.log(startDateTime);
+        axios
+            .post("http://localhost:4000/api/create-event", {
+                summary,
+                description,
+                location,
+                startDateTime,
+                endDateTime,
+            })
+            .then((response) => {
+                console.log(response.data);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+    };
+
+    const [summary, setSummary] = useState("");
+    const [description, setDescription] = useState("");
+    const [location, setLocation] = useState("");
+    const [startDateTime, setStartDateTime] = useState("");
+    const [endDateTime, setEndDateTime] = useState("");
+    const [isLoggedIn, setisLoggedIn] = useState(false);
+    // gCal end
+
+    return (
+
+        <ProtectedPage>
+            <Main title="Event Management">
+
+                <div>
+                    <AddEventModal show={show} setShow={setShow} />
+                    <div id='button'>
+                        <Button className="button_color" onClick={() => {
+                            setShow(true)
+                        }}>Create new event</Button>
+                    </div>
+                    <br></br>
+                    <div>
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Event title</th>
+                                    <th>Description</th>
+                                    <th>Start date and time</th>
+                                    <th>End date and time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    event_list.map(item => {
+                                        return <>
+                                            <tr key={item.id}>
+                                                <td>{item.event_title}</td>
+                                            </tr>
+                                        </>
+                                    })
+                                }
+                            </tbody>
+                        </Table>
+                    </div>
+                    <Button className="button_color" >Generate report</Button>
+                </div>
+
+            </Main>
+        </ProtectedPage>
+    )
+}
